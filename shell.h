@@ -17,7 +17,8 @@
 
 extern char **environ;
 
-typedef struct {
+typedef struct
+{
 	char *command;
 	char **args;
 	int arg_count;
