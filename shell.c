@@ -206,10 +206,11 @@ int execute_command(cmd_t *cmd, char *program_name)
 {
 	char *executable_path = NULL;
 	pid_t pid;
-	int status;
+	int status, builtin_result;
 
-	if (handle_builtin(cmd) == 1)
-		return (1);
+	builtin_result = handle_builtin(cmd);
+	if (builtin_result == 1 || builtin_result == -1)
+    	return (builtin_result);
 
 	executable_path = NULL;
 
