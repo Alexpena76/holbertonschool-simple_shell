@@ -39,6 +39,7 @@ void shell_loop(char *program_name)
 {
 	char *input;
 	cmd_t *cmd;
+	int result = 0;
 
 	while (1)
 	{
@@ -67,8 +68,13 @@ void shell_loop(char *program_name)
 
 		if (cmd != NULL)
 		{
-			execute_command(cmd, program_name);
-			free_cmd(cmd);
+    		result = execute_command(cmd, program_name);
+    		free_cmd(cmd);
+    		if (result == -1)
+    		{
+        		free(input);
+        		break;
+    		}
 		}
 
 		free(input);
@@ -338,11 +344,9 @@ return (0);
 
 int builtin_exit(cmd_t *cmd)
 {
-	free_cmd(cmd);
+	(void)cmd;
 
-	exit(0);
-
-	return (1);
+	return (-1);
 }
 
 /**
@@ -395,7 +399,7 @@ void free_cmd(cmd_t *cmd)
 	if (cmd->command != NULL)
 		free(cmd->command);
 
-	if (cmd->command != NULL)
+	if (cmd->args != NULL)
 		free_array(cmd->args);
 
 	free(cmd);
