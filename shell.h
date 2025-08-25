@@ -31,6 +31,7 @@ cmd_t *parse_input(char *input);
 int execute_command(cmd_t *cmd, char *program_name);
 
 char *find_command_in_path(char *command);
+char *find_path_in_environ(void);
 int is_executable(char *path);
 
 int handle_builtin(cmd_t *cmd);

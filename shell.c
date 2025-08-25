@@ -265,7 +265,7 @@ char *find_command_in_path(char *command)
 {
 	char *path_env, *path_copy, *dir, *full_path;
 	
-	path_env = find_path_in_environ();;
+	path_env = find_path_in_environ();
 
 	if (path_env == NULL)
 		return (NULL);
