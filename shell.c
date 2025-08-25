@@ -265,7 +265,7 @@ char *find_command_in_path(char *command)
 {
 	char *path_env, *path_copy, *dir, *full_path;
 	
-	path_env = getenv("PATH");
+	path_env = find_path_in_environ();;
 
 	if (path_env == NULL)
 		return (NULL);
@@ -441,4 +441,23 @@ int count_args(char **args)
 		count++;
 
 	return (count);
+}
+
+/**
+ * find_path_in_environ - Find PATH environment variable value
+ * 
+ * Return: Pointer to PATH value string, or NULL if PATH is not found
+ */
+
+char *find_path_in_environ(void)
+{
+    int i = 0;
+    
+    while (environ[i] != NULL)
+    {
+        if (strncmp(environ[i], "PATH=", 5) == 0)
+            return (environ[i] + 5);
+        i++;
+    }
+    return (NULL);
 }
