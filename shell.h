@@ -42,5 +42,6 @@ void print_error(char *program_name, char *command, char *message);
 void free_cmd(cmd_t *cmd);
 char **split_string(char *str, char *delim);
 void free_array(char **array);
+int count_args(char **args);
 
 #endif

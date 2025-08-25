@@ -52,13 +52,16 @@ void shell_loop(char *program_name)
 		if (input == NULL)
 		{
 			if (interactive_mode)
-				printf("\n");
+				write(STDOUT_FILENO, "\n", 1);
 
 			break;
 		}
 
-		if (input == "")
+		if (strlen(input) == 0)
+		{
+			free(input);
 			continue;
+		}
 
 		cmd = parse_input(input);
 
@@ -68,30 +71,35 @@ void shell_loop(char *program_name)
 			free_cmd(cmd);
 		}
 
-		free (input);
+		free(input);
 	}
 }
 
 /**
+ * display_prompt - Display shell prompt
  * 
+ * Return: Void function
  */
 
-void display_prompt()
+void display_prompt(void)
 {
-	print("PROMPT");
+	printf("($) ");
 	fflush(stdout);
 }
 
 /**
+ * read_input - Read input from stdin
  * 
+ * Return: Input string or NULL on EOF/error
  */
 
- void read_input()
+ char *read_input(void)
  {
-	line = NULL;
-	len = 0;
+	char *line = NULL;
+	size_t len = 0;
+	ssize_t bytes_read;
 
-	bytes_read = getline(&line, &len, stdin)
+	bytes_read = getline(&line, &len, stdin);
 
 	if (bytes_read == -1)
 	{
@@ -102,9 +110,9 @@ void display_prompt()
 	}
 
 	if (line[bytes_read - 1] == '\n')
-		line[bytes_read - 1] == '\0';
+		line[bytes_read - 1] = '\0';
 
-	return(line);
+	return (line);
  }
 
 /**
@@ -116,27 +124,31 @@ void display_prompt()
 
 cmd_t *parse_input(char *input)
 {
-	cmd = malloc(sizeof(cmd_t));
+	cmd_t *cmd;
 
-	while (input[0] == " ")
+	cmd = malloc(sizeof(cmd_t));
+	if (cmd == NULL)
+		return (NULL);
+
+	while (*input == ' ' || *input == '\t')
 		input = input + 1;
 
-	if (input == "")
+	if (*input == '\0')
 	{
 		free(cmd);
 		return (NULL);
 	}
 
-	cmd->args = split_string(input, " /t");
+	cmd->args = split_string(input, " \t");
 
 	if (cmd->args == NULL || cmd->args[0] == NULL)
 	{
-		free (cmd);
+		free(cmd);
 		return (NULL);
 	}
 
-	cmd->command = COPY cmd->args[0];
-	cmd->arg_count = count(cmd->args);
+	cmd->command = strdup(cmd->args[0]);
+	cmd->arg_count = count_args(cmd->args);
 
 	return (cmd);
 }
@@ -151,20 +163,27 @@ cmd_t *parse_input(char *input)
 
 char **split_string(char *str, char *delim)
 {
-	tokens = ?;
-	token_count = 0;
-	token;
+	char **tokens;
+	int token_count = 0;
+	char *token;
+	char *str_copy;
 
-	token = strtok(str, delim);
+	tokens = malloc(sizeof(char *) * MAX_ARGS);
+	if (tokens == NULL)
+		return(NULL);
+
+	str_copy = strdup(str);
+	token = strtok(str_copy, delim);
 
 	while (token != NULL && token_count < MAX_ARGS - 1)
 	{
-		tokens[token_count] = copy token;
+		tokens[token_count] = strdup(token);
 		token_count = token_count + 1;
 		token = strtok(NULL, delim);
 	}
 
 	tokens[token_count] = NULL;
+	free(str_copy);
 
 	return (tokens);
 }
@@ -179,12 +198,16 @@ char **split_string(char *str, char *delim)
 
 int execute_command(cmd_t *cmd, char *program_name)
 {
+	char *executable_path = NULL;
+	pid_t pid;
+	int status;
+
 	if (handle_builtin(cmd) == 1)
 		return (1);
 
 	executable_path = NULL;
 
-	if (cmd->command contains '/')
+	if (strchr(cmd->command, '/') != NULL)
 		executable_path = cmd->command;
 	else
 		executable_path = find_command_in_path(cmd->command);
@@ -216,7 +239,7 @@ int execute_command(cmd_t *cmd, char *program_name)
 	else if (pid > 0)
 	{	
 		wait(&status);
-		if(executable_path != cmd->command);
+		if(executable_path != cmd->command)
 			free(executable_path);
 
 		return (WEXITSTATUS(status));
@@ -232,7 +255,7 @@ int execute_command(cmd_t *cmd, char *program_name)
 }
 
 /**
- * file_command_in_path - Search for command in PATH directories
+ * find_command_in_path - Search for command in PATH directories
  * @command: Command name to search for
  * 
  * Return: Full path to executable, or NULL if not found
@@ -240,18 +263,20 @@ int execute_command(cmd_t *cmd, char *program_name)
 
 char *find_command_in_path(char *command)
 {
+	char *path_env, *path_copy, *dir, *full_path;
+	
 	path_env = getenv("PATH");
 
 	if (path_env == NULL)
 		return (NULL);
 
-	path_copy = COPY path_env;
-	dir = strtok(path_copy, ":")
+	path_copy = strdup(path_env);
+	dir = strtok(path_copy, ":");
 
 	while (dir != NULL)
 	{
-		full_path = malloc(sizeof(dir + "/" + command));
-		CONCATENATE dir + "/" + command into full_path;
+		full_path = malloc(strlen(dir) + strlen(command) + 2);
+		sprintf(full_path, "%s/%s", dir, command);
 
 		if (is_executable(full_path))
 		{
@@ -263,7 +288,7 @@ char *find_command_in_path(char *command)
 		dir = strtok(NULL, ":");
 	}
 
-	free(path_copy)
+	free(path_copy);
 	return (NULL);
 }
 
@@ -276,7 +301,7 @@ char *find_command_in_path(char *command)
 
 int is_executable(char *path)
 {
-	int stat_buf;
+	struct stat stat_buf;
 
 	if (stat(path, &stat_buf) == -1)
 		return (0);
@@ -288,7 +313,7 @@ int is_executable(char *path)
 }
 
 /**
- * handle_builtin - Check if command is built_in and execute it
+ * handle_builtin - Check if command is built-in and execute it
  * @cmd: Command structure
  * 
  * Return: 1 if built-in was handled, 0 if not a built-in
@@ -330,10 +355,11 @@ int builtin_exit(cmd_t *cmd)
 int builtin_env(cmd_t *cmd)
 {
 	int i = 0;
+	(void)cmd;
 
 	while (environ[i] != NULL)
 	{
-		printf("%d", environ[i]);
+		printf("%s\n", environ[i]);
 		i = i + 1;
 	}
 
@@ -341,12 +367,17 @@ int builtin_env(cmd_t *cmd)
 }
 
 /**
+ * print_error - Print error message to stderr
+ * @program_name: Name of the program
+ * @command: Command that caused error
+ * @message: Error message
  * 
+ * Return: Void function
  */
 
 void print_error(char *program_name, char *command, char *message)
 {
-	printf("%s + ": 1: " + %s + ": " + %s + "\n" to stderr", program_name, command, message);
+	fprintf(stderr, "%s: 1: %s: %s\n", program_name, command, message);
 }
 
 /**
@@ -357,6 +388,18 @@ void print_error(char *program_name, char *command, char *message)
  */
 
 void free_cmd(cmd_t *cmd)
+{
+	if (cmd == NULL)
+		return;
+
+	if (cmd->command != NULL)
+		free(cmd->command);
+
+	if (cmd->command != NULL)
+		free_array(cmd->args);
+
+	free(cmd);
+}
 
 /**
  * free_array - Free array of strings
@@ -367,5 +410,35 @@ void free_cmd(cmd_t *cmd)
 
 void free_array(char **array)
 {
+	int i = 0;
 
+	if (array == NULL)
+		return;
+
+	while (array[i] != NULL)
+	{
+		free(array[i]);
+		i++;
+	}
+
+	free(array);
+}
+
+/**
+ * count_args - Count number of arguments in array
+ * @args: NULL-terminated array of strings
+ * 
+ * Return: Number of arguments
+ */
+int count_args(char **args)
+{
+	int count = 0;
+
+	if (args == NULL)
+		return (0);
+
+	while (args[count] != NULL)
+		count++;
+
+	return (count);
 }
