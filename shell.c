@@ -2,6 +2,7 @@
 
 char *program_name;
 int interactive_mode;
+int last_exit_status = 0;
 
 /**
  * main - Entry point for simple shell
@@ -256,6 +257,7 @@ int execute_command(cmd_t *cmd, char *program_name)
 		if(executable_path != cmd->command)
 			free(executable_path);
 
+		last_exit_status = WEXITSTATUS(status);
 		return (WEXITSTATUS(status));
 	}
 	else
@@ -353,7 +355,7 @@ return (0);
 int builtin_exit(cmd_t *cmd)
 {
 	(void)cmd;
-
+	exit(last_exit_status);
 	return (-1);
 }
 
