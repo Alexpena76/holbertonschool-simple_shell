@@ -67,15 +67,22 @@ void shell_loop(char *program_name)
 		cmd = parse_input(input);
 
 		if (cmd != NULL)
-		{
-    		result = execute_command(cmd, program_name);
-    		free_cmd(cmd);
-    		if (result == -1)
-    		{
-        		free(input);
-        		break;
-    		}
-		}
+    	{
+        	result = execute_command(cmd, program_name);
+        	free_cmd(cmd);
+        
+        	if (!interactive_mode && result == -1)
+        	{
+            	free(input);
+            	exit(127);
+        	}
+        
+        	if (result == -1)
+        	{
+            	free(input);
+            	break;
+        	}
+    	}
 
 		free(input);
 	}
