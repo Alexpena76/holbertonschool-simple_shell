@@ -81,7 +81,7 @@ void shell_loop(char *program_name)
         	if (result == -1)
         	{
             	free(input);
-            	break;
+            	exit(last_exit_status);
         	}
     	}
 
@@ -355,7 +355,6 @@ return (0);
 int builtin_exit(cmd_t *cmd)
 {
 	(void)cmd;
-	exit(last_exit_status);
 	return (-1);
 }
 
