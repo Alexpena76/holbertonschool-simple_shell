@@ -255,3 +255,7 @@ The shell has been tested with various scenarios including:
 - Error conditions (invalid commands, permissions)
 - Memory leak detection with Valgrind
 - Interactive and non-interactive modes
+
+![Shell Execution Flow - Part 1](./Images/Flowchart_1.png)
+![Shell Execution Flow - Part 2](./Images/Flowchart_2.png) 
+![Shell Execution Flow - Part 3](./Images/Flowchart_3.png)
