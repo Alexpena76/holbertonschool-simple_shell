@@ -6,24 +6,22 @@ This is a simple UNIX command interpreter implementation that provides basic she
 ## Code Structure
 The implementation consists of 15 main functions organized in a modular design:
 main()
-↓
-shell_loop()
-↓
-├── read_input()
-├── parse_input()
-│   └── split_string()
-├── execute_command()
-│   ├── handle_builtin()
-│   │   ├── builtin_exit()
-│   │   └── builtin_env()
-│   ├── find_command_in_path()
-│   │   └── find_path_in_environ()
-│   └── is_executable()
-└── Memory Management
-├── free_cmd()
-├── free_array()
-└── count_args()
-
+└── shell_loop()
+    ├── display_prompt()
+    ├── read_input()
+    ├── parse_input()
+    │   └── split_string()
+    └── execute_command()
+        ├── handle_builtin()
+        │   ├── builtin_exit()
+        │   └── builtin_env()
+        ├── find_command_in_path()
+        │   └── find_path_in_environ()
+        ├── is_executable()
+        └── Memory Management
+            ├── free_cmd()
+            ├── free_array()
+            └── count_args()
 ## Function Documentation
 
 ### 1. `main(int argc, char *argv[])`
