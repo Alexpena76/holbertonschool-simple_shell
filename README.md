@@ -5,6 +5,7 @@ This is a simple UNIX command interpreter implementation that provides basic she
 
 ## Code Structure
 The implementation consists of 15 main functions organized in a modular design:
+```c
 main()
 └── shell_loop()
     ├── display_prompt()
@@ -22,6 +23,7 @@ main()
             ├── free_cmd()
             ├── free_array()
             └── count_args()
+```
 ## Function Documentation
 
 ### 1. `main(int argc, char *argv[])`
