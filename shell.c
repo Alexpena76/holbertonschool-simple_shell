@@ -220,8 +220,6 @@ int execute_command(cmd_t *cmd, char *program_name)
 	if (builtin_result == 1 || builtin_result == -1)
     	return (builtin_result);
 
-	executable_path = NULL;
-
 	if (strchr(cmd->command, '/') != NULL)
 		executable_path = cmd->command;
 	else
@@ -306,6 +304,26 @@ char *find_command_in_path(char *command)
 
 	free(path_copy);
 	return (NULL);
+}
+
+/**
+ * find_path_in_environ - Find PATH environment variable value
+ * 
+ * Return: Pointer to PATH value string, or NULL if PATH is not found
+ */
+
+char *find_path_in_environ(void)
+{
+    int i = 0;
+	
+    
+    while (environ[i] != NULL)
+    {
+        if (strncmp(environ[i], "PATH=", 5) == 0)
+            return (environ[i] + 5);
+        i++;
+    }
+    return (NULL);
 }
 
 /**
@@ -454,23 +472,4 @@ int count_args(char **args)
 		count++;
 
 	return (count);
-}
-
-/**
- * find_path_in_environ - Find PATH environment variable value
- * 
- * Return: Pointer to PATH value string, or NULL if PATH is not found
- */
-
-char *find_path_in_environ(void)
-{
-    int i = 0;
-    
-    while (environ[i] != NULL)
-    {
-        if (strncmp(environ[i], "PATH=", 5) == 0)
-            return (environ[i] + 5);
-        i++;
-    }
-    return (NULL);
 }
